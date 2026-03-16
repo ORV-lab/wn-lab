@@ -156,10 +156,8 @@ wn-lab/
     │   │   └── mockData.ts
     │   │
     │   ├── test/               # Тестовые конфиги
-    │   │   ├── setup.ts
-    │   │   └── example.test.ts
+    │   │   └── setup.ts
     │   │
-    │   ├── App.css             # Глобальные стили
     │   ├── index.css           # Tailwind & базовые стили
     │   └── vite-env.d.ts       # TypeScript для Vite
     │
