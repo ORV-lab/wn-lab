@@ -5,4 +5,4 @@ import "./index.css";
 // Default to dark theme
 document.documentElement.classList.add("dark");
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")).render(<App />);
