@@ -39,7 +39,7 @@ const Home = () => {
     <motion.main
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pb-24 md:pb-16 md:pt-24"
+      className="min-h-screen overflow-x-hidden pb-24 md:pb-16 md:pt-24"
     >
       <section className="px-4 pt-6 md:pt-10">
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -47,7 +47,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="paper-panel relative overflow-hidden rounded-[2rem] border border-white/60 px-6 py-8 sm:px-8 sm:py-10"
+            className="paper-panel relative min-w-0 overflow-hidden rounded-[2rem] border border-white/60 px-6 py-8 sm:px-8 sm:py-10"
           >
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/55 to-transparent" />
             <div className="relative">
@@ -56,24 +56,24 @@ const Home = () => {
                   <Compass className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-foreground/45">
+                  <p className="text-xs uppercase tracking-[0.28em] text-foreground/55">
                     Literary discovery
                   </p>
-                  <p className="mt-1 font-medium text-foreground/70">
+                  <p className="mt-1 font-medium text-foreground/78">
                     Handpicked web novels with new chapters every day
                   </p>
                 </div>
               </div>
 
               <div className="mt-8 max-w-2xl">
-                <h1 className="novel-text-serif text-5xl font-semibold leading-[0.92] text-foreground sm:text-6xl">
+                <h1 className="novel-text-serif text-5xl font-semibold leading-[0.92] text-[#2a2f35] sm:text-6xl">
                   Read deeper.
                   <br />
                   Find the next world
                   <br />
                   worth disappearing into.
                 </h1>
-                <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+                <p className="mt-5 max-w-xl text-base leading-7 text-[#6e7682] sm:text-lg">
                   A more curated home for translated web novels: sharp discovery,
                   beautiful reading rhythm, and living collections built for binge sessions.
                 </p>
@@ -120,7 +120,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16 }}
-            className="ink-panel relative overflow-hidden rounded-[2rem] border border-white/10 p-5 text-white"
+            className="ink-panel relative min-w-0 overflow-hidden rounded-[2rem] border border-white/10 p-5 text-white"
           >
             <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-primary/18 blur-3xl" />
             <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-accent/20 blur-3xl" />
@@ -205,7 +205,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.24 }}
-            className="paper-panel rounded-[2rem] border border-white/60 p-5 sm:p-6"
+            className="paper-panel min-w-0 rounded-[2rem] border border-white/60 p-5 sm:p-6"
           >
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
@@ -232,7 +232,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid gap-6"
+            className="min-w-0 grid gap-6"
           >
             <article className="rounded-[2rem] border border-white/10 bg-[#162331] p-5 text-white shadow-[0_22px_48px_rgba(14,20,28,0.24)]">
               <div className="flex items-center gap-3">
@@ -289,7 +289,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.34 }}
-            className="paper-panel rounded-[2rem] border border-white/60 p-5 sm:p-6"
+            className="paper-panel min-w-0 rounded-[2rem] border border-white/60 p-5 sm:p-6"
           >
             <div className="flex items-end justify-between gap-4">
               <div>
@@ -348,7 +348,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="rounded-[2rem] border border-white/10 bg-[#162331] p-5 text-white shadow-[0_22px_48px_rgba(14,20,28,0.24)] sm:p-6"
+            className="min-w-0 rounded-[2rem] border border-white/10 bg-[#162331] p-5 text-white shadow-[0_22px_48px_rgba(14,20,28,0.24)] sm:p-6"
           >
             <div className="flex items-end justify-between gap-4">
               <div>
