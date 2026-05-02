@@ -22,7 +22,7 @@ const Navbar = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#101b26]/88 backdrop-blur-2xl md:top-0 md:bottom-auto md:border-t-0 md:border-b">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:h-20">
+      <div className="mx-auto flex h-16 w-full max-w-none items-center justify-between px-4 md:h-[74px] md:px-6 xl:px-10">
         <Link to="/" className="hidden items-center gap-3 md:flex">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-primary">
             <Compass className="h-5 w-5" />
