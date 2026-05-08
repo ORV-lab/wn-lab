@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Archive.io",
+  title: "WN-Lab",
   description: "Desktop-first reading workspace for WN-Lab.",
 };
 
