@@ -758,10 +758,12 @@ img {
   justify-content: center;
   width: 34px;
   height: 34px;
+  border: 0;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.07);
   color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
+  cursor: default;
   transition: background 180ms ease, color 180ms ease;
 }
 
@@ -784,6 +786,78 @@ img {
 
 .site-footer__link:hover {
   color: #a8c5ff;
+}
+
+.site-shell--info {
+  width: min(calc(100vw - (var(--page-gutter) * 2)), 1514px);
+}
+
+.info-page {
+  min-height: 100vh;
+}
+
+.info-content {
+  padding: 56px 48px 0;
+}
+
+.info-eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+}
+
+.info-title {
+  margin: 18px 0 0;
+  font-family: "Tinos", Georgia, serif;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 48px;
+}
+
+.info-text {
+  max-width: 760px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 28px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.info-card {
+  min-height: 188px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.info-card__title {
+  margin: 0;
+  font-family: "Tinos", Georgia, serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+}
+
+.info-card__text {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 25px;
+}
+
+.info-footer-wrap {
+  padding: 72px 48px 40px;
 }
 
 .site-footer__bottom {

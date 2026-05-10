@@ -19,15 +19,9 @@ export function SiteFooter() {
           </p>
 
           <div className="site-footer__socials">
-            <a href="#" className="site-footer__social" aria-label="Discord">
-              <AppIcon name="discord" className="site-footer__social-icon" />
-            </a>
-            <a href="#" className="site-footer__social" aria-label="X">
-              <AppIcon name="x" className="site-footer__social-icon" />
-            </a>
-            <a href="#" className="site-footer__social" aria-label="GitHub">
-              <AppIcon name="github" className="site-footer__social-icon" />
-            </a>
+            <button className="site-footer__social" type="button" aria-label="Контактная почта WN-Lab">
+              <AppIcon name="mail" className="site-footer__social-icon" />
+            </button>
           </div>
         </div>
 
@@ -64,15 +58,12 @@ export function SiteFooter() {
         <div className="site-footer__group">
           <p className="site-footer__heading">Проект</p>
           <div className="site-footer__stack">
-            <a href="#" className="site-footer__link">
-              О проекте
-            </a>
-            <a href="#" className="site-footer__link">
-              Политика доступа
-            </a>
-            <a href="#" className="site-footer__link">
+            <Link href="/support" className="site-footer__link">
+              Поддержка
+            </Link>
+            <Link href="/terms" className="site-footer__link">
               Пользовательское соглашение
-            </a>
+            </Link>
           </div>
         </div>
       </div>

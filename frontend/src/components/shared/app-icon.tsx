@@ -6,6 +6,7 @@ type IconName =
   | "discord"
   | "x"
   | "github"
+  | "mail"
   | "filter"
   | "sort"
   | "heart"
@@ -100,6 +101,13 @@ export function AppIcon({ name, className }: AppIconProps) {
       return (
         <svg {...common}>
           <path d="M9 19c-4.5 1.4-4.5-2.5-6-3m12 6v-3.5a3 3 0 0 0-.8-2.2c2.7-.3 5.6-1.3 5.6-5.8A4.5 4.5 0 0 0 18.5 7a4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C6.6 3.5 5.6 3.8 5.6 3.8A4.2 4.2 0 0 0 5.5 7a4.5 4.5 0 0 0-1.3 3.5c0 4.5 2.9 5.5 5.6 5.8A3 3 0 0 0 9 18.5V22" />
+        </svg>
+      );
+    case "mail":
+      return (
+        <svg {...common}>
+          <rect x="3.5" y="6" width="17" height="12" rx="2" />
+          <path d="m5.5 8 6.5 5 6.5-5" />
         </svg>
       );
     case "filter":

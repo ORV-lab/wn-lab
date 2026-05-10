@@ -208,6 +208,34 @@ type TranslationJob = {
 };
 ```
 
+### SupportTicket
+
+```ts
+type SupportTicket = {
+  id: string;
+  type: "complaint" | "bug" | "access" | "copyright" | "other";
+  subject: string;
+  message: string;
+  email: string | null;
+  status: "new" | "in_review" | "resolved" | "closed";
+  createdAt: string;
+  updatedAt: string;
+};
+```
+
+### LegalDocument
+
+```ts
+type LegalDocument = {
+  slug: "terms";
+  title: string;
+  version: string;
+  publishedAt: string | null;
+  updatedAt: string | null;
+  content: string;
+};
+```
+
 ## Frontend Route To API Map
 
 ```text
@@ -224,6 +252,8 @@ type TranslationJob = {
 /settings                   -> GET/PATCH /api/v1/me/settings
 /profile                    -> GET /api/v1/me/profile
 /translate                  -> translation endpoints
+/support                    -> GET /api/v1/support/page
+/terms                      -> GET /api/v1/legal/terms
 ```
 
 ## System
@@ -816,6 +846,98 @@ Response:
 }
 ```
 
+## Support
+
+### GET /api/v1/support/page
+
+Auth: optional
+
+Used by: `/support`
+
+Purpose: returns the content needed to render the support page.
+
+Response:
+
+```ts
+type SupportPageResponse = {
+  page: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  ticketTypes: Array<{
+    value: "complaint" | "bug" | "access" | "copyright" | "other";
+    label: string;
+    description: string;
+  }>;
+  contact: {
+    email: string | null;
+    enabled: boolean;
+    note: string;
+  };
+  status: {
+    formEnabled: boolean;
+    note: string;
+  };
+};
+```
+
+### POST /api/v1/support/tickets
+
+Auth: optional
+
+Purpose: create a user complaint or support request.
+
+Request:
+
+```json
+{
+  "type": "complaint",
+  "subject": "Жалоба на произведение",
+  "message": "Описание обращения",
+  "email": "user@example.com"
+}
+```
+
+Response:
+
+```ts
+type CreateSupportTicketResponse = SupportTicket;
+```
+
+### GET /api/v1/me/support/tickets
+
+Auth: required
+
+Purpose: return the current user's submitted support tickets.
+
+Response:
+
+```ts
+type MySupportTicketsResponse = {
+  items: SupportTicket[];
+  total: number;
+};
+```
+
+## Legal
+
+### GET /api/v1/legal/terms
+
+Auth: optional
+
+Used by: `/terms`
+
+Purpose: returns the current public version of the user agreement.
+
+Response:
+
+```ts
+type TermsResponse = {
+  document: LegalDocument;
+};
+```
+
 ## Search
 
 ### GET /api/v1/search
@@ -860,6 +982,8 @@ backend/app/api/routes/profile.py
 backend/app/api/routes/notifications.py
 backend/app/api/routes/settings.py
 backend/app/api/routes/translation.py
+backend/app/api/routes/support.py
+backend/app/api/routes/legal.py
 backend/app/api/routes/search.py
 backend/app/schemas/
 backend/app/services/
@@ -877,6 +1001,8 @@ app.include_router(profile_router, prefix="/api/v1")
 app.include_router(notifications_router, prefix="/api/v1")
 app.include_router(settings_router, prefix="/api/v1")
 app.include_router(translation_router, prefix="/api/v1")
+app.include_router(support_router, prefix="/api/v1")
+app.include_router(legal_router, prefix="/api/v1")
 app.include_router(search_router, prefix="/api/v1")
 ```
 
@@ -890,8 +1016,10 @@ app.include_router(search_router, prefix="/api/v1")
 6. `GET /api/v1/me/profile`
 7. `GET /api/v1/me/notifications`
 8. `GET/PATCH /api/v1/me/settings`
-9. Translation job endpoints
-10. Mutations for favorites, library state, notifications, and reading progress
+9. `GET /api/v1/support/page`
+10. `GET /api/v1/legal/terms`
+11. Translation job endpoints
+12. Mutations for favorites, library state, notifications, reading progress, and support tickets
 
 This order matches the current frontend screens and lets the project replace
 mock data page by page without blocking the rest of the UI.
