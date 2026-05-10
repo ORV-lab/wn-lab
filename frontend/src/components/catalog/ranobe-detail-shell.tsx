@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { AppIcon } from "@/components/shared/app-icon";
+import { FavoriteToggle } from "@/components/catalog/favorite-toggle";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
+import { formatRelativeDate } from "@/lib/time";
+import type { BookDetailResponse } from "@/lib/types";
 
-const coverImage =
-  "https://www.figma.com/api/mcp/asset/e2f7ea6b-4963-4b38-b49c-31cb8fc2a305";
+type RanobeDetailShellProps = {
+  data: BookDetailResponse;
+};
 
-export function RanobeDetailShell() {
+export function RanobeDetailShell({ data }: RanobeDetailShellProps) {
+  const currentChapter = data.userState?.progress?.chapterNumber ?? data.chapters[0]?.number ?? 1;
+  const lastPublishedAt = data.chapters.at(-1)?.publishedAt;
+
   return (
     <main className="detail-page">
       <section className="site-shell site-shell--detail">
@@ -20,21 +27,19 @@ export function RanobeDetailShell() {
 
           <div className="detail-hero">
             <div className="detail-cover">
-              <img className="detail-cover__image" src={coverImage} alt="Нейромант" />
+              <img className="detail-cover__image" src={data.book.coverUrl} alt={data.book.title} />
             </div>
 
             <div className="detail-main">
               <div className="detail-main__top">
                 <div>
-                  <p className="detail-main__eyebrow">Научная фантастика</p>
-                  <h1 className="detail-main__title">Нейромант</h1>
-                  <p className="detail-main__author">Уильям Гибсон</p>
+                  <p className="detail-main__eyebrow">{data.book.genres[0] ?? "Архив"}</p>
+                  <h1 className="detail-main__title">{data.book.title}</h1>
+                  <p className="detail-main__author">{data.book.author}</p>
                 </div>
 
                 <div className="detail-actions">
-                  <button className="detail-icon-button" type="button" aria-label="В избранное">
-                    <AppIcon name="heart" className="detail-icon" />
-                  </button>
+                  <FavoriteToggle slug={data.book.slug} initialValue={Boolean(data.userState?.isFavorite)} />
                   <button className="detail-icon-button" type="button" aria-label="Поделиться">
                     <AppIcon name="share" className="detail-icon" />
                   </button>
@@ -45,31 +50,36 @@ export function RanobeDetailShell() {
                 <div className="detail-stat">
                   <p className="detail-stat__label">Рейтинг</p>
                   <p className="detail-stat__value">
-                    4.8 <span className="detail-stat__accent">★</span>
+                    {data.book.rating.toFixed(1)} <span className="detail-stat__accent">★</span>
                   </p>
                 </div>
                 <div className="detail-stat">
                   <p className="detail-stat__label">Год издания</p>
-                  <p className="detail-stat__value">1984</p>
+                  <p className="detail-stat__value">{data.book.publicationYear ?? "—"}</p>
                 </div>
                 <div className="detail-stat">
                   <p className="detail-stat__label">Статус перевода</p>
-                  <p className="detail-stat__value detail-stat__value--accent">100%</p>
+                  <p className="detail-stat__value detail-stat__value--accent">
+                    {data.book.translationProgress}%
+                  </p>
                 </div>
               </div>
 
               <div className="detail-summary">
                 <h2 className="detail-summary__title">Синопсис</h2>
+                <p className="detail-summary__text">{data.book.description}</p>
+              </div>
+
+              <div className="detail-summary">
+                <h2 className="detail-summary__title">Главы</h2>
                 <p className="detail-summary__text">
-                  Классический киберпанк-роман, открывший миру матрицу и виртуальную
-                  реальность. Кейс был лучшим хакером в спауле, пока не совершил
-                  фатальную ошибку. Теперь у него есть последний шанс вернуться в
-                  игру, но цена может оказаться слишком высокой.
+                  Доступно {data.chapters.length} глав.
+                  {lastPublishedAt ? ` Последнее обновление ${formatRelativeDate(lastPublishedAt)}.` : ""}
                 </p>
               </div>
 
               <div className="detail-cta">
-                <Link href="/catalog/neuromant/read" className="detail-cta__primary">
+                <Link href={`/catalog/${data.book.slug}/read?chapter=${currentChapter}`} className="detail-cta__primary">
                   <AppIcon name="read" className="detail-cta__icon" />
                   Читать
                 </Link>

@@ -1,13 +1,14 @@
+import Link from "next/link";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
-import {
-  continueReading,
-  cyberpunkCollection,
-  latestUpdates,
-  popularThisWeek,
-} from "@/data/mock-library";
+import { formatRelativeDate } from "@/lib/time";
+import type { HomeResponse } from "@/lib/types";
 
-export function LibraryShell() {
+type LibraryShellProps = {
+  data: HomeResponse;
+};
+
+export function LibraryShell({ data }: LibraryShellProps) {
   return (
     <main className="library-page">
       <section className="site-shell site-shell--home">
@@ -34,17 +35,17 @@ export function LibraryShell() {
             </h1>
 
             <p className="hero__text">
-              Погрузитесь в частный цифровой архив, где передовые алгоритмы
-              ИИ-перевода сохраняют дух оригинала.
+              Погрузитесь в частный цифровой архив, где передовые алгоритмы ИИ-перевода
+              сохраняют дух оригинала.
             </p>
 
             <div className="hero__actions">
-              <button className="button button--primary" type="button">
+              <Link className="button button--primary" href={data.continueReading[0]?.readUrl ?? "/catalog"}>
                 Начать чтение
-              </button>
-              <button className="button button--secondary" type="button">
+              </Link>
+              <Link className="button button--secondary" href="/catalog">
                 Каталог
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -56,24 +57,21 @@ export function LibraryShell() {
                 <span className="section-heading__icon section-heading__icon--teal" />
                 <h2 className="section-heading__title">Продолжить чтение</h2>
               </div>
-              <a className="section-heading__action" href="#">
+              <Link className="section-heading__action" href="/library/reading">
                 Смотреть всё
-              </a>
+              </Link>
             </div>
 
             <div className="continue-grid">
-              {continueReading.map((item) => (
-                <article key={item.id} className="continue-card">
-                  <img className="continue-card__cover" src={item.cover} alt={item.title} />
+              {data.continueReading.map((item) => (
+                <Link key={item.bookId} href={item.readUrl} className="continue-card">
+                  <img className="continue-card__cover" src={item.coverUrl} alt={item.title} />
                   <div className="continue-card__body">
                     <h3 className="continue-card__title">{item.title}</h3>
-                    <p className="continue-card__chapter">{item.chapter}</p>
+                    <p className="continue-card__chapter">{item.chapterTitle}</p>
                     <div className="continue-card__progress">
                       <div className="continue-card__track">
-                        <div
-                          className="continue-card__fill"
-                          style={{ width: `${item.progress}%` }}
-                        />
+                        <div className="continue-card__fill" style={{ width: `${item.progress}%` }} />
                       </div>
                       <div className="continue-card__meta">
                         <span>Прогресс</span>
@@ -81,7 +79,7 @@ export function LibraryShell() {
                       </div>
                     </div>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           </section>
@@ -92,21 +90,21 @@ export function LibraryShell() {
                 <span className="section-heading__icon section-heading__icon--orange" />
                 <h2 className="section-heading__title">Популярное за неделю</h2>
               </div>
-              <a className="section-heading__action" href="#">
+              <Link className="section-heading__action" href="/catalog?sort=rating">
                 Весь топ
-              </a>
+              </Link>
             </div>
 
             <div className="popular-grid">
-              {popularThisWeek.map((item) => (
-                <article key={item.id} className="popular-card">
+              {data.popularThisWeek.map((item) => (
+                <Link key={item.bookId} href={`/catalog/${item.slug}`} className="popular-card">
                   <div className="popular-card__image-wrap">
-                    <img className="popular-card__image" src={item.cover} alt={item.title} />
-                    <span className="popular-card__badge">★ {item.badge}</span>
+                    <img className="popular-card__image" src={item.coverUrl} alt={item.title} />
+                    <span className="popular-card__badge">★ {item.rating.toFixed(1)}</span>
                   </div>
                   <h3 className="popular-card__title">{item.title}</h3>
                   <p className="popular-card__author">{item.author}</p>
-                </article>
+                </Link>
               ))}
             </div>
           </section>
@@ -117,23 +115,27 @@ export function LibraryShell() {
                 <span className="section-heading__icon section-heading__icon--green" />
                 <h2 className="section-heading__title">Последние обновления</h2>
               </div>
-              <a className="section-heading__action" href="#">
+              <Link className="section-heading__action" href="/catalog?sort=updated">
                 Архив обновлений
-              </a>
+              </Link>
             </div>
 
             <div className="updates-grid">
-              {latestUpdates.map((item) => (
-                <article key={item.id} className="update-card">
-                  <img className="update-card__cover" src={item.cover} alt={item.title} />
+              {data.latestUpdates.map((item) => (
+                <Link
+                  key={`${item.bookId}-${item.chapterNumber}`}
+                  href={`/catalog/${item.slug}/read?chapter=${item.chapterNumber}`}
+                  className="update-card"
+                >
+                  <img className="update-card__cover" src={item.coverUrl} alt={item.title} />
                   <div className="update-card__body">
                     <h3 className="update-card__title">{item.title}</h3>
                     <div className="update-card__row">
-                      <span className="update-card__tag">{item.chapter}</span>
-                      <span className="update-card__time">{item.when}</span>
+                      <span className="update-card__tag">{item.chapterTitle}</span>
+                      <span className="update-card__time">{formatRelativeDate(item.publishedAt)}</span>
                     </div>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           </section>
@@ -141,21 +143,17 @@ export function LibraryShell() {
           <section className="collection-banner">
             <img
               className="collection-banner__image"
-              src={cyberpunkCollection.cover}
-              alt={cyberpunkCollection.title}
+              src={data.featuredCollection.coverUrl}
+              alt={data.featuredCollection.title}
             />
             <div className="collection-banner__overlay" />
             <div className="collection-banner__content">
-              <p className="collection-banner__eyebrow">
-                {cyberpunkCollection.eyebrow}
-              </p>
-              <h2 className="collection-banner__title">{cyberpunkCollection.title}</h2>
-              <p className="collection-banner__text">
-                {cyberpunkCollection.description}
-              </p>
-              <button className="button button--light" type="button">
+              <p className="collection-banner__eyebrow">{data.featuredCollection.eyebrow}</p>
+              <h2 className="collection-banner__title">{data.featuredCollection.title}</h2>
+              <p className="collection-banner__text">{data.featuredCollection.description}</p>
+              <Link className="button button--light" href={data.featuredCollection.href}>
                 Исследовать
-              </button>
+              </Link>
             </div>
           </section>
 

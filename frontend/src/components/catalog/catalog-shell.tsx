@@ -2,9 +2,19 @@ import Link from "next/link";
 import { AppIcon } from "@/components/shared/app-icon";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
-import { catalogBooks } from "@/data/catalog";
+import type { BooksResponse } from "@/lib/types";
 
-export function CatalogShell() {
+type CatalogShellProps = {
+  data: BooksResponse;
+  query: {
+    q?: string;
+    genre?: string;
+    status?: string;
+    sort?: string;
+  };
+};
+
+export function CatalogShell({ data, query }: CatalogShellProps) {
   return (
     <main className="catalog-page">
       <section className="site-shell site-shell--catalog">
@@ -13,43 +23,54 @@ export function CatalogShell() {
         <section className="catalog-hero">
           <h1 className="catalog-hero__title">Архив Произведений</h1>
           <p className="catalog-hero__text">
-            Структурированная база данных всех доступных текстов. ИИ-перевод в
-            реальном времени, глубокий анализ и сохранение оригинального стиля.
+            Структурированная база данных всех доступных текстов. ИИ-перевод в реальном
+            времени, глубокий анализ и сохранение оригинального стиля.
           </p>
 
-          <div className="catalog-toolbar">
+          <form className="catalog-toolbar" action="/catalog">
             <label className="catalog-search">
               <AppIcon name="search" className="icon" />
               <input
                 className="catalog-search__input"
+                name="q"
                 type="text"
+                defaultValue={query.q}
                 placeholder="Поиск по названию, автору или тегу..."
               />
             </label>
 
-            <button className="catalog-toolbar__button" type="button">
-              <AppIcon name="filter" className="catalog-toolbar__icon" />
-              Фильтры
-            </button>
+            <select className="catalog-toolbar__button" name="status" defaultValue={query.status ?? ""}>
+              <option value="">Все статусы</option>
+              <option value="ongoing">В процессе</option>
+              <option value="completed">Завершено</option>
+              <option value="paused">Пауза</option>
+            </select>
 
-            <button className="catalog-toolbar__button" type="button">
-              <AppIcon name="sort" className="catalog-toolbar__icon" />
-              Сортировка
+            <select className="catalog-toolbar__button" name="sort" defaultValue={query.sort ?? "popular"}>
+              <option value="popular">Популярное</option>
+              <option value="rating">Рейтинг</option>
+              <option value="updated">Обновления</option>
+              <option value="title">Название</option>
+            </select>
+
+            <button className="catalog-toolbar__button" type="submit">
+              <AppIcon name="filter" className="catalog-toolbar__icon" />
+              Применить
             </button>
-          </div>
+          </form>
         </section>
 
         <section className="catalog-grid-wrap">
           <div className="catalog-grid">
-            {catalogBooks.map((book) => (
-              <Link key={book.id} href={book.href} className="catalog-card">
+            {data.items.map((book) => (
+              <Link key={book.id} href={`/catalog/${book.slug}`} className="catalog-card">
                 <div className="catalog-card__media">
-                  <img className="catalog-card__image" src={book.cover} alt={book.title} />
+                  <img className="catalog-card__image" src={book.coverUrl} alt={book.title} />
                 </div>
                 <div className="catalog-card__body">
                   <h2 className="catalog-card__title">{book.title}</h2>
                   <p className="catalog-card__author">{book.author}</p>
-                  <p className="catalog-card__tag">{book.tag}</p>
+                  <p className="catalog-card__tag">{book.tags.join(" · ")}</p>
                 </div>
               </Link>
             ))}
