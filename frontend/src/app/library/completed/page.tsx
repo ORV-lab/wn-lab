@@ -1,7 +1,8 @@
 import { UserLibraryShell } from "@/components/library/library-shell";
-import { getLibrary } from "@/lib/api";
+import { getAuthenticatedLibrary, requireServerSession } from "@/lib/server-api";
 
 export default async function LibraryCompletedPage() {
-  const data = await getLibrary("completed");
+  await requireServerSession("/library/completed");
+  const data = await getAuthenticatedLibrary("completed");
   return <UserLibraryShell activeCategory="completed" data={data} />;
 }

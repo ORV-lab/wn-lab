@@ -1,7 +1,8 @@
 import { TranslateShell } from "@/components/translate/translate-shell";
-import { getTranslationDashboard } from "@/lib/api";
+import { getAuthenticatedTranslationDashboard, requireServerSession } from "@/lib/server-api";
 
 export default async function TranslatePage() {
-  const data = await getTranslationDashboard();
+  await requireServerSession("/translate");
+  const data = await getAuthenticatedTranslationDashboard();
   return <TranslateShell initialData={data} />;
 }

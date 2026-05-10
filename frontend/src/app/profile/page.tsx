@@ -1,7 +1,8 @@
 import { ProfileShell } from "@/components/profile/profile-shell";
-import { getProfile } from "@/lib/api";
+import { getAuthenticatedProfile, requireServerSession } from "@/lib/server-api";
 
 export default async function ProfilePage() {
-  const data = await getProfile();
+  await requireServerSession("/profile");
+  const data = await getAuthenticatedProfile();
   return <ProfileShell data={data} />;
 }

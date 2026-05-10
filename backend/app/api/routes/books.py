@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.deps.auth import get_current_user
 from app.services.demo_store import (
     get_book_detail,
     get_reader_chapter,
@@ -39,7 +40,7 @@ async def book_detail(slug: str) -> dict:
 
 
 @router.post("/books/{slug}/favorite")
-async def add_favorite(slug: str) -> dict:
+async def add_favorite(slug: str, _: dict = Depends(get_current_user)) -> dict:
     try:
         return set_book_favorite(slug, True)
     except KeyError as exc:
@@ -47,7 +48,7 @@ async def add_favorite(slug: str) -> dict:
 
 
 @router.delete("/books/{slug}/favorite")
-async def remove_favorite(slug: str) -> dict:
+async def remove_favorite(slug: str, _: dict = Depends(get_current_user)) -> dict:
     try:
         return set_book_favorite(slug, False)
     except KeyError as exc:
@@ -71,7 +72,12 @@ async def reader_chapter(slug: str, chapterNumber: int) -> dict:
 
 
 @router.patch("/books/{slug}/chapters/{chapterNumber}/progress")
-async def patch_progress(slug: str, chapterNumber: int, payload: UpdateProgressPayload) -> dict:
+async def patch_progress(
+    slug: str,
+    chapterNumber: int,
+    payload: UpdateProgressPayload,
+    _: dict = Depends(get_current_user),
+) -> dict:
     try:
         return update_reader_progress(
             slug,

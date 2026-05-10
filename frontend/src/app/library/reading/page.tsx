@@ -1,7 +1,8 @@
 import { UserLibraryShell } from "@/components/library/library-shell";
-import { getLibrary } from "@/lib/api";
+import { getAuthenticatedLibrary, requireServerSession } from "@/lib/server-api";
 
 export default async function LibraryReadingPage() {
-  const data = await getLibrary("reading");
+  await requireServerSession("/library/reading");
+  const data = await getAuthenticatedLibrary("reading");
   return <UserLibraryShell activeCategory="reading" data={data} />;
 }

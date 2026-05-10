@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+import secrets
 from typing import Any
 from uuid import uuid4
 
@@ -206,6 +207,15 @@ DEMO_USER: dict[str, Any] = {
     "favoriteGenre": "Киберпанк",
     "registeredAt": _iso(datetime(2023, 10, 15, 12, 0, tzinfo=UTC)),
 }
+
+USERS_BY_ID: dict[str, dict[str, Any]] = {
+    DEMO_USER["id"]: {
+        **deepcopy(DEMO_USER),
+        "password": "demo12345",
+    }
+}
+USERS_BY_EMAIL: dict[str, str] = {DEMO_USER["email"].lower(): DEMO_USER["id"]}
+SESSION_TOKENS: dict[str, str] = {}
 
 READING_PROGRESS: dict[str, dict[str, Any]] = {
     "neuromant": {
@@ -489,6 +499,80 @@ def _find_book_by_id(book_id: str) -> dict[str, Any]:
     if book is None:
         raise KeyError(book_id)
     return book
+
+
+def _public_user(user: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": user["id"],
+        "username": user["username"],
+        "displayName": user["displayName"],
+        "email": user["email"],
+        "avatarUrl": user["avatarUrl"],
+        "coverUrl": user["coverUrl"],
+        "bio": user["bio"],
+        "level": user["level"],
+        "streakDays": user["streakDays"],
+        "favoriteGenre": user["favoriteGenre"],
+        "registeredAt": user["registeredAt"],
+    }
+
+
+def register_user(
+    username: str,
+    display_name: str,
+    email: str,
+    password: str,
+) -> dict[str, Any]:
+    email_key = email.lower().strip()
+    if email_key in USERS_BY_EMAIL:
+        raise ValueError("email_already_exists")
+
+    user_id = f"user-{uuid4().hex[:10]}"
+    user = {
+        "id": user_id,
+        "username": username.strip(),
+        "displayName": display_name.strip(),
+        "email": email.strip(),
+        "avatarUrl": None,
+        "coverUrl": None,
+        "bio": "Новый читатель WN-Lab.",
+        "level": 1,
+        "streakDays": 0,
+        "favoriteGenre": None,
+        "registeredAt": _iso(datetime.now(UTC)),
+        "password": password,
+    }
+    USERS_BY_ID[user_id] = user
+    USERS_BY_EMAIL[email_key] = user_id
+    token = secrets.token_urlsafe(32)
+    SESSION_TOKENS[token] = user_id
+    return {"token": token, "user": _copy(_public_user(user))}
+
+
+def login_user(email: str, password: str) -> dict[str, Any]:
+    user_id = USERS_BY_EMAIL.get(email.lower().strip())
+    if user_id is None:
+        raise ValueError("invalid_credentials")
+    user = USERS_BY_ID[user_id]
+    if user["password"] != password:
+        raise ValueError("invalid_credentials")
+    token = secrets.token_urlsafe(32)
+    SESSION_TOKENS[token] = user_id
+    return {"token": token, "user": _copy(_public_user(user))}
+
+
+def get_user_by_token(token: str) -> dict[str, Any] | None:
+    user_id = SESSION_TOKENS.get(token)
+    if user_id is None:
+        return None
+    user = USERS_BY_ID.get(user_id)
+    if user is None:
+        return None
+    return user
+
+
+def revoke_token(token: str) -> None:
+    SESSION_TOKENS.pop(token, None)
 
 
 def _user_state(slug: str) -> dict[str, Any]:
@@ -777,23 +861,29 @@ def update_library_item(book_id: str, is_favorite: bool | None, is_completed: bo
     return _library_item(book_id)
 
 
-def get_profile() -> dict[str, Any]:
+def get_profile(user: dict[str, Any] | None = None) -> dict[str, Any]:
+    current_user = user or DEMO_USER
     return {
-        "user": _copy(DEMO_USER),
+        "user": _copy(_public_user(current_user)),
         "stats": _copy(PROFILE_STATS),
         "achievements": _copy(PROFILE_ACHIEVEMENTS),
         "activity": _copy(PROFILE_ACTIVITY),
     }
 
 
-def update_profile(display_name: str | None, bio: str | None, favorite_genre: str | None) -> dict[str, Any]:
+def update_profile(
+    user: dict[str, Any],
+    display_name: str | None,
+    bio: str | None,
+    favorite_genre: str | None,
+) -> dict[str, Any]:
     if display_name is not None:
-        DEMO_USER["displayName"] = display_name
+        user["displayName"] = display_name
     if bio is not None:
-        DEMO_USER["bio"] = bio
+        user["bio"] = bio
     if favorite_genre is not None:
-        DEMO_USER["favoriteGenre"] = favorite_genre
-    return _copy(DEMO_USER)
+        user["favoriteGenre"] = favorite_genre
+    return _copy(_public_user(user))
 
 
 def list_notifications(status: str = "all", page: int = 1, page_size: int = 24) -> dict[str, Any]:

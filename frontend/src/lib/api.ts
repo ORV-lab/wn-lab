@@ -1,4 +1,5 @@
 import type {
+  AuthResponse,
   BookDetailResponse,
   BooksResponse,
   HomeResponse,
@@ -11,9 +12,7 @@ import type {
   TermsResponse,
   TranslationDashboardResponse,
 } from "@/lib/types";
-
-const API_BASE_URL =
-  process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { API_BASE_URL, SESSION_COOKIE_NAME } from "@/lib/config";
 
 function buildUrl(path: string, params?: Record<string, string | number | undefined | null>) {
   const url = new URL(path, API_BASE_URL);
@@ -28,13 +27,25 @@ function buildUrl(path: string, params?: Record<string, string | number | undefi
 }
 
 async function requestJson<T>(path: string, init?: RequestInit, params?: Record<string, string | number | undefined | null>): Promise<T> {
+  const headers = new Headers(init?.headers ?? {});
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  const token =
+    typeof document === "undefined"
+      ? null
+      : document.cookie
+          .split("; ")
+          .find((item) => item.startsWith(`${SESSION_COOKIE_NAME}=`))
+          ?.split("=")[1];
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${decodeURIComponent(token)}`);
+  }
+
   const response = await fetch(buildUrl(path, params), {
     ...init,
     cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -107,9 +118,22 @@ export function getTranslationDashboard() {
 }
 
 export async function createTranslationJob(formData: FormData) {
+  const headers = new Headers();
+  const token =
+    typeof document === "undefined"
+      ? null
+      : document.cookie
+          .split("; ")
+          .find((item) => item.startsWith(`${SESSION_COOKIE_NAME}=`))
+          ?.split("=")[1];
+  if (token) {
+    headers.set("Authorization", `Bearer ${decodeURIComponent(token)}`);
+  }
+
   const response = await fetch(buildUrl("/api/v1/translation/jobs"), {
     method: "POST",
     body: formData,
+    headers,
   });
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -135,4 +159,39 @@ export function createSupportTicket(payload: {
 
 export function getTerms() {
   return requestJson<TermsResponse>("/api/v1/legal/terms");
+}
+
+export async function login(payload: { email: string; password: string }) {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error("Login failed");
+  }
+  return (await response.json()) as AuthResponse;
+}
+
+export async function register(payload: {
+  username: string;
+  displayName: string;
+  email: string;
+  password: string;
+}) {
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error("Registration failed");
+  }
+  return (await response.json()) as AuthResponse;
+}
+
+export async function logout() {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+  });
 }

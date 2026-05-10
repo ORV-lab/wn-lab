@@ -1,7 +1,8 @@
 import { UserLibraryShell } from "@/components/library/library-shell";
-import { getLibrary } from "@/lib/api";
+import { getAuthenticatedLibrary, requireServerSession } from "@/lib/server-api";
 
 export default async function LibraryFavoritesPage() {
-  const data = await getLibrary("favorites");
+  await requireServerSession("/library/favorites");
+  const data = await getAuthenticatedLibrary("favorites");
   return <UserLibraryShell activeCategory="favorites" data={data} />;
 }

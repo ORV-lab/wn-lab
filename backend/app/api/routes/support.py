@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from app.api.deps.auth import get_current_user
 from app.services.demo_store import create_support_ticket, get_my_support_tickets, get_support_page
 
 router = APIRouter(tags=["support"])
@@ -24,5 +25,5 @@ async def create_ticket(payload: SupportTicketPayload) -> dict:
 
 
 @router.get("/me/support/tickets")
-async def my_support_tickets() -> dict:
+async def my_support_tickets(_: dict = Depends(get_current_user)) -> dict:
     return get_my_support_tickets()

@@ -272,3 +272,12 @@ export type TermsResponse = {
     content: string;
   };
 };
+
+export type AuthSession = {
+  user: User;
+};
+
+export type AuthResponse = {
+  token: string;
+  user: User;
+};
