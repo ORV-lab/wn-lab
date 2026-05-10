@@ -3,20 +3,19 @@ import { AppIcon } from "@/components/shared/app-icon";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
 import {
-  libraryBooks,
   libraryCategoryMeta,
   type LibraryCategory,
 } from "@/data/library";
+import type { LibraryResponse } from "@/lib/types";
 
 type LibraryShellProps = {
   activeCategory: LibraryCategory;
+  data: LibraryResponse;
 };
 
 const categoryOrder: LibraryCategory[] = ["all", "reading", "favorites", "completed"];
 
-export function UserLibraryShell({ activeCategory }: LibraryShellProps) {
-  const books = libraryBooks.filter((book) => book.categories.includes(activeCategory));
-
+export function UserLibraryShell({ activeCategory, data }: LibraryShellProps) {
   return (
     <main className="library-hub-page">
       <section className="site-shell site-shell--library">
@@ -40,11 +39,7 @@ export function UserLibraryShell({ activeCategory }: LibraryShellProps) {
                   <Link
                     key={category}
                     href={item.href}
-                    className={
-                      isActive
-                        ? "library-hub-tab library-hub-tab--active"
-                        : "library-hub-tab"
-                    }
+                    className={isActive ? "library-hub-tab library-hub-tab--active" : "library-hub-tab"}
                     aria-current={isActive ? "page" : undefined}
                   >
                     <AppIcon name={item.icon as "stack" | "clock" | "bookmark" | "check"} className="library-hub-tab__icon" />
@@ -60,6 +55,7 @@ export function UserLibraryShell({ activeCategory }: LibraryShellProps) {
                 className="library-hub-search__input"
                 type="text"
                 placeholder="Поиск в библиотеке..."
+                disabled
               />
             </label>
           </div>
@@ -67,31 +63,27 @@ export function UserLibraryShell({ activeCategory }: LibraryShellProps) {
 
         <section className="library-hub-content">
           <div className="library-hub-grid">
-            {books.map((book) => (
-              <Link key={book.id} href={book.href} className="library-hub-card">
+            {data.items.map((item) => (
+              <Link key={item.book.id} href={`/catalog/${item.book.slug}`} className="library-hub-card">
                 <div className="library-hub-card__cover-wrap">
-                  <img
-                    className="library-hub-card__cover"
-                    src={book.cover}
-                    alt={book.title}
-                  />
+                  <img className="library-hub-card__cover" src={item.book.coverUrl} alt={item.book.title} />
                 </div>
 
                 <div className="library-hub-card__body">
                   <div className="library-hub-card__meta">
-                    <h2 className="library-hub-card__title">{book.title}</h2>
-                    <p className="library-hub-card__author">{book.author}</p>
+                    <h2 className="library-hub-card__title">{item.book.title}</h2>
+                    <p className="library-hub-card__author">{item.book.author}</p>
                   </div>
 
                   <div className="library-hub-card__progress">
                     <div className="library-hub-card__progress-row">
                       <span>Прогресс</span>
-                      <span>{book.progress}%</span>
+                      <span>{item.progress?.progressPercent ?? 0}%</span>
                     </div>
                     <div className="library-hub-card__track">
                       <div
                         className="library-hub-card__fill"
-                        style={{ width: `${book.progress}%` }}
+                        style={{ width: `${item.progress?.progressPercent ?? 0}%` }}
                       />
                     </div>
                   </div>
