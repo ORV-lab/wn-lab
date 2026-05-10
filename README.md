@@ -102,6 +102,37 @@ WN-Lab/
 
 ## Быстрый старт
 
+### Docker
+
+Собрать и запустить весь проект одной командой:
+
+```bash
+docker compose up --build
+```
+
+По умолчанию сервисы поднимаются на:
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8000`
+
+Если один из портов уже занят, можно переопределить его перед запуском:
+
+```bash
+FRONTEND_PORT=3001 BACKEND_PORT=8001 docker compose up --build
+```
+
+Для запуска в фоне:
+
+```bash
+docker compose up -d --build
+```
+
+Для остановки:
+
+```bash
+docker compose down
+```
+
 ### Frontend
 
 Установка зависимостей:
