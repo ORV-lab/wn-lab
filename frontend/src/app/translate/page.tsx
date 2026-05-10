@@ -1,5 +1,7 @@
 import { TranslateShell } from "@/components/translate/translate-shell";
+import { getTranslationDashboard } from "@/lib/api";
 
-export default function TranslatePage() {
-  return <TranslateShell />;
+export default async function TranslatePage() {
+  const data = await getTranslationDashboard();
+  return <TranslateShell initialData={data} />;
 }

@@ -1,7 +1,13 @@
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
+import { formatLongDate } from "@/lib/time";
+import type { TermsResponse } from "@/lib/types";
 
-export function TermsShell() {
+type TermsShellProps = {
+  data: TermsResponse;
+};
+
+export function TermsShell({ data }: TermsShellProps) {
   return (
     <main className="info-page">
       <section className="site-shell site-shell--info">
@@ -9,27 +15,22 @@ export function TermsShell() {
 
         <section className="info-content">
           <p className="info-eyebrow">Документы</p>
-          <h1 className="info-title">Пользовательское соглашение</h1>
+          <h1 className="info-title">{data.document.title}</h1>
           <p className="info-text">
-            Здесь будет размещена официальная версия пользовательского соглашения WN-Lab.
-            На текущем этапе страница подготовлена как часть структуры проекта и будет
-            заполнена после утверждения юридического текста.
+            Версия {data.document.version}. Последнее обновление{" "}
+            {data.document.updatedAt ? formatLongDate(data.document.updatedAt) : "ещё не опубликовано"}.
           </p>
 
           <div className="info-grid">
             <article className="info-card">
-              <h2 className="info-card__title">Что появится на странице</h2>
-              <p className="info-card__text">
-                Условия использования платформы, правила доступа к материалам и порядок
-                взаимодействия с пользовательским контентом.
-              </p>
+              <h2 className="info-card__title">Текущая редакция</h2>
+              <p className="info-card__text">{data.document.content}</p>
             </article>
 
             <article className="info-card">
-              <h2 className="info-card__title">Текущий статус</h2>
+              <h2 className="info-card__title">Статус</h2>
               <p className="info-card__text">
-                Юридический текст еще не опубликован. Сейчас это подготовленный route под
-                будущий финальный документ.
+                Документ уже приходит с backend и готов к замене на финальную юридическую версию без изменений во frontend.
               </p>
             </article>
           </div>

@@ -1,25 +1,30 @@
+"use client";
+
+import { useState, useTransition } from "react";
 import { AppIcon } from "@/components/shared/app-icon";
 import { SiteFooter } from "@/components/shared/site-footer";
 import { SiteHeader } from "@/components/shared/site-header";
+import { createTranslationJob } from "@/lib/api";
+import { formatRelativeDate } from "@/lib/time";
+import type { TranslationDashboardResponse, TranslationJob } from "@/lib/types";
+
+type TranslateShellProps = {
+  initialData: TranslationDashboardResponse;
+};
 
 const translateHero =
   "https://www.figma.com/api/mcp/asset/40beacef-3d65-4f0b-8fdc-01b706b8c542";
 
-const historyItems = [
-  { title: "Omniscient Reader...", langs: "KR → RU", time: "Вчера" },
-  { title: "The Beginning After...", langs: "EN → RU", time: "3 дня назад" },
-  { title: "Lord of the Mysteries", langs: "CN → RU", time: "Неделю назад" },
-] as const;
+export function TranslateShell({ initialData }: TranslateShellProps) {
+  const [data, setData] = useState(initialData);
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [sourceLanguage, setSourceLanguage] = useState("KR");
+  const [targetLanguage, setTargetLanguage] = useState("RU");
+  const [file, setFile] = useState<File | null>(null);
+  const [status, setStatus] = useState(" ");
+  const [isPending, startTransition] = useTransition();
 
-const queueItems = [
-  { user: "m***_star", file: "The_Veil.epub", progress: 64, status: "#1" },
-  { user: "k***_arch", file: "Otter_City.docx", progress: 22, status: "#2" },
-  { user: "n***_runner", file: "Neon_Dream.pdf", progress: 8, status: "#3" },
-  { user: "l***_hacker", file: "Data_Sinsmora.docx", progress: 1, status: "#4" },
-  { user: "r***_bot", file: "Iron_Soul.epub", progress: 0, status: "#5" },
-] as const;
-
-export function TranslateShell() {
   return (
     <main className="translate-page">
       <section className="site-shell site-shell--translate">
@@ -33,12 +38,11 @@ export function TranslateShell() {
           <div className="translate-hero__content">
             <span className="translate-chip">
               <AppIcon name="bolt" className="translate-chip__icon" />
-              Архивариус Engine v4.2
+              {data.engine.name} v{data.engine.version}
             </span>
             <h1 className="translate-hero__title">ИИ-Переводчик</h1>
             <p className="translate-hero__text">
-              Адаптивный художественный перевод новелл с сохранением авторского
-              стиля и контекста.
+              Адаптивный художественный перевод новелл с сохранением авторского стиля и контекста.
             </p>
           </div>
         </section>
@@ -55,20 +59,12 @@ export function TranslateShell() {
                 <div className="translate-form">
                   <label className="translate-field">
                     <span className="translate-field__label">Оригинальное название</span>
-                    <input
-                      className="translate-field__input"
-                      type="text"
-                      defaultValue="Например: Heaven Official's Blessing"
-                    />
+                    <input className="translate-field__input" type="text" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Например: Heaven Official's Blessing" />
                   </label>
 
                   <label className="translate-field">
                     <span className="translate-field__label">Автор (опционально)</span>
-                    <input
-                      className="translate-field__input"
-                      type="text"
-                      defaultValue="Имя автора"
-                    />
+                    <input className="translate-field__input" type="text" value={author} onChange={(event) => setAuthor(event.target.value)} placeholder="Имя автора" />
                   </label>
                 </div>
               </article>
@@ -82,18 +78,20 @@ export function TranslateShell() {
                 <div className="translate-form">
                   <label className="translate-field">
                     <span className="translate-field__label">С какого языка переводим?</span>
-                    <button className="translate-select" type="button">
-                      Корейский
-                      <span className="translate-select__caret" />
-                    </button>
+                    <select className="translate-select" value={sourceLanguage} onChange={(event) => setSourceLanguage(event.target.value)}>
+                      <option value="KR">Корейский</option>
+                      <option value="EN">Английский</option>
+                      <option value="CN">Китайский</option>
+                      <option value="JP">Японский</option>
+                    </select>
                   </label>
 
                   <label className="translate-field">
                     <span className="translate-field__label">На какой язык?</span>
-                    <button className="translate-select" type="button">
-                      Русский
-                      <span className="translate-select__caret" />
-                    </button>
+                    <select className="translate-select" value={targetLanguage} onChange={(event) => setTargetLanguage(event.target.value)}>
+                      <option value="RU">Русский</option>
+                      <option value="EN">Английский</option>
+                    </select>
                   </label>
                 </div>
               </article>
@@ -115,9 +113,7 @@ export function TranslateShell() {
                   <br />
                   Максимальный размер файла 50MB.
                 </p>
-                <button className="translate-dropzone__button" type="button">
-                  Обзор файлов
-                </button>
+                <input type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
               </div>
             </article>
 
@@ -134,53 +130,83 @@ export function TranslateShell() {
               </div>
 
               <div className="translate-queue__table-head">
-                <span>Пользователь</span>
+                <span>Задача</span>
                 <span>Прогресс</span>
                 <span>Статус</span>
               </div>
 
               <div className="translate-queue__rows">
-                {queueItems.map((item) => (
-                  <div key={item.user} className="translate-queue__row">
+                {data.queue.map((item) => (
+                  <div key={item.id} className="translate-queue__row">
                     <div className="translate-queue__user">
-                      <span className="translate-queue__avatar">{item.user[0].toUpperCase()}</span>
+                      <span className="translate-queue__avatar">{item.title[0].toUpperCase()}</span>
                       <div>
-                        <p className="translate-queue__user-name">{item.user}</p>
-                        <p className="translate-queue__user-file">{item.file}</p>
+                        <p className="translate-queue__user-name">{item.title}</p>
+                        <p className="translate-queue__user-file">{item.fileName}</p>
                       </div>
                     </div>
 
                     <div className="translate-queue__progress">
                       <div className="translate-queue__progress-track">
-                        <div
-                          className="translate-queue__progress-fill"
-                          style={{ width: `${item.progress}%` }}
-                        />
+                        <div className="translate-queue__progress-fill" style={{ width: `${item.progress}%` }} />
                       </div>
                       <span className="translate-queue__progress-label">{item.progress}%</span>
                     </div>
 
-                    <span className="translate-queue__status">{item.status}</span>
+                    <span className="translate-queue__status">
+                      {item.queuePosition ? `#${item.queuePosition}` : item.status}
+                    </span>
                   </div>
                 ))}
               </div>
 
               <div className="translate-queue__footer">
                 <AppIcon name="clock" className="translate-queue__footer-icon" />
-                Ожидаемое время обработки: ~4.2 мин
+                Ожидаемое время обработки: ~{(data.serverStatus.averageWaitSeconds / 60).toFixed(1)} мин
               </div>
             </article>
 
             <article className="translate-card translate-launch">
               <div className="translate-launch__note">
                 <AppIcon name="clock" className="translate-launch__note-icon" />
-                Время обработки зависит от объема текста
+                Время обработки зависит от объёма текста
               </div>
 
-              <button className="translate-launch__button" type="button">
+              <button
+                className="translate-launch__button"
+                type="button"
+                disabled={isPending}
+                onClick={() => {
+                  startTransition(async () => {
+                    if (!title || !file) {
+                      setStatus("Заполните название и выберите файл");
+                      return;
+                    }
+
+                    const formData = new FormData();
+                    formData.set("title", title);
+                    formData.set("author", author);
+                    formData.set("sourceLanguage", sourceLanguage);
+                    formData.set("targetLanguage", targetLanguage);
+                    formData.set("file", file);
+
+                    try {
+                      const job = (await createTranslationJob(formData)) as TranslationJob;
+                      setData((current) => ({ ...current, queue: [job, ...current.queue] }));
+                      setTitle("");
+                      setAuthor("");
+                      setFile(null);
+                      setStatus("Задача добавлена в очередь");
+                    } catch {
+                      setStatus("Не удалось создать задачу");
+                    }
+                  });
+                }}
+              >
                 <AppIcon name="bolt" className="translate-launch__button-icon" />
                 Начать перевод
               </button>
+              <p>{status}</p>
             </article>
           </div>
 
@@ -188,22 +214,20 @@ export function TranslateShell() {
             <article className="translate-card translate-history">
               <div className="translate-card__title-row">
                 <AppIcon name="history" className="translate-card__icon translate-card__icon-tone--text" />
-                <h2 className="translate-card__title translate-card__title--small">
-                  История переводов
-                </h2>
+                <h2 className="translate-card__title translate-card__title--small">История переводов</h2>
               </div>
 
               <div className="translate-history__list">
-                {historyItems.map((item) => (
-                  <div key={item.title} className="translate-history__item">
+                {data.history.map((item) => (
+                  <div key={item.id} className="translate-history__item">
                     <div className="translate-history__item-icon">
                       <AppIcon name="history" className="translate-history__doc-icon" />
                     </div>
                     <div className="translate-history__item-body">
                       <p className="translate-history__item-title">{item.title}</p>
                       <div className="translate-history__item-meta">
-                        <span>{item.langs}</span>
-                        <span>{item.time}</span>
+                        <span>{item.sourceLanguage} → {item.targetLanguage}</span>
+                        <span>{formatRelativeDate(item.createdAt)}</span>
                       </div>
                     </div>
                   </div>
@@ -218,38 +242,38 @@ export function TranslateShell() {
             <article className="translate-card translate-status">
               <div className="translate-card__title-row">
                 <AppIcon name="status" className="translate-card__icon translate-card__icon-tone--teal" />
-                <h2 className="translate-card__title translate-card__title--small">
-                  Статус серверов
-                </h2>
+                <h2 className="translate-card__title translate-card__title--small">Статус серверов</h2>
               </div>
 
               <div className="translate-status__rows">
                 <div className="translate-status__row">
                   <span>Активные ноды</span>
                   <strong className="translate-status__value translate-status__value--accent">
-                    12/12
+                    {data.serverStatus.activeNodes}/{data.serverStatus.totalNodes}
                   </strong>
                 </div>
                 <div className="translate-status__row">
                   <span>Глобальная очередь</span>
-                  <strong className="translate-status__value">428 файлов</strong>
+                  <strong className="translate-status__value">{data.serverStatus.queuedFiles} файлов</strong>
                 </div>
                 <div className="translate-status__row">
                   <span>Среднее ожидание</span>
-                  <strong className="translate-status__value">4.2 мин</strong>
+                  <strong className="translate-status__value">{(data.serverStatus.averageWaitSeconds / 60).toFixed(1)} мин</strong>
                 </div>
               </div>
 
               <div className="translate-status__pro">
                 <div className="translate-status__pro-head">
                   <AppIcon name="bolt" className="translate-status__pro-icon" />
-                  <span>Pro-статус</span>
+                  <span>{data.userPlan.name.toUpperCase()}-статус</span>
                 </div>
                 <p className="translate-status__pro-text">
-                  Приоритетный доступ к нейросетям без ожидания в очереди.
+                  {data.userPlan.hasPriorityQueue
+                    ? "Приоритетный доступ к нейросетям уже активен."
+                    : "Улучшите аккаунт, чтобы получить приоритетную очередь."}
                 </p>
                 <button className="translate-status__pro-button" type="button">
-                  Улучшить аккаунт
+                  Управление тарифом
                 </button>
               </div>
             </article>
